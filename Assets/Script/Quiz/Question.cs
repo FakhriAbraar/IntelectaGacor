@@ -1,16 +1,15 @@
-using UnityEngine;
+using System;
 
-public class Question : MonoBehaviour
+[Serializable]
+public class Question
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public string questionText;     
+    public string[] answers;        
+    public int correctAnswerIndex;  
+}
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+[Serializable]
+public class QuestionList
+{
+    public Question[] questions;
 }
