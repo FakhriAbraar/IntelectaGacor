@@ -2218,9 +2218,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c923b4b36e57572499f8c92ed1c1197a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  essayTextDisplay: {fileID: 0}
+  essaySlots:
+  - {fileID: 309817361}
+  - {fileID: 131668610}
+  - {fileID: 1202177853}
+  - {fileID: 255117441}
   timerTextDisplay: {fileID: 244560927}
-  essayLines: []
+  jsonFile: {fileID: 4900000, guid: d206a21b8aaf34d4998901ed8370bb45, type: 3}
   gameDuration: 75
   autoSkipSpaces: 1
   colorCorrect: '#000000'
