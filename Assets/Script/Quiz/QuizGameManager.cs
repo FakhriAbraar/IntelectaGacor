@@ -7,28 +7,35 @@ using UnityEngine.UI;
 public class QuizGameManager : MonoBehaviour
 {
     [Header("Game Settings")]
-    public TextAsset jsonFile;      // Masukkan file Quiz.json ke sini
-    public float globalTime = 45f;  // Waktu total permainan
-    public int maxQuestions = 10;   // Batas jumlah soal
+    public TextAsset jsonFile;
+    public float globalTime = 45f;
+    public int maxQuestions = 10;
 
     [Header("UI References")]
-    public TextMeshProUGUI questionText; // Masukkan Text Pertanyaan (Question)
-    public TextMeshProUGUI timerText;    // Masukkan Text Timer
-    public GameObject[] crossIcons;      // Masukkan 3 Gambar Silang (Lives)
+    public TextMeshProUGUI questionText;
+    public TextMeshProUGUI timerText;
+    public GameObject[] crossIcons;
 
     [Header("Buttons")]
-    public AnswerButton[] answerButtons; // Masukkan 4 Object Tombol (A, B, C, D)
+    public AnswerButton[] answerButtons;
 
-    // Variabel Internal
+    // Data Soal
     private List<Question> allQuestions = new List<Question>();
     private int currentQuestionIndex = 0;
+
+    // Status Game
     private int currentLives = 3;
     private float timer;
     private bool isGameActive = true;
 
+    // --- LIST BARU UNTUK MENYIMPAN URUTAN ACAK ---
+    // List ini akan menyimpan pemetaan tombol ke jawaban asli
+    // Contoh: Tombol 0 (Kiri Atas) ternyata menyimpan jawaban index 2 (C)
+    private List<int> currentShuffledIndices = new List<int>();
+
     void Start()
     {
-        // 1. Load Soal dari File JSON
+        // 1. Load Soal
         if (jsonFile != null)
         {
             QuestionList data = JsonUtility.FromJson<QuestionList>(jsonFile.text);
@@ -41,25 +48,20 @@ public class QuizGameManager : MonoBehaviour
             return;
         }
 
-        // 2. Reset Status Game
+        // 2. Reset Status
         timer = globalTime;
         currentLives = 3;
         currentQuestionIndex = 0;
 
-        // Sembunyikan semua tanda silang di awal
-        foreach (var cross in crossIcons)
-        {
-            if (cross != null) cross.SetActive(false);
-        }
+        foreach (var cross in crossIcons) if (cross != null) cross.SetActive(false);
 
-        // 3. Setup Tombol Jawaban
+        // 3. Setup Tombol
         for (int i = 0; i < answerButtons.Length; i++)
         {
             if (answerButtons[i] != null)
             {
                 answerButtons[i].Setup(this, i);
 
-                // Tambahkan fungsi klik secara otomatis via kode
                 Button btn = answerButtons[i].GetComponent<Button>();
                 if (btn != null)
                 {
@@ -69,13 +71,11 @@ public class QuizGameManager : MonoBehaviour
             }
         }
 
-        // 4. Mulai Tampilkan Soal Pertama
         ShowQuestion();
     }
 
     void Update()
     {
-        // Logika Timer Berjalan Mundur
         if (isGameActive && timer > 0)
         {
             timer -= Time.deltaTime;
@@ -90,51 +90,64 @@ public class QuizGameManager : MonoBehaviour
         }
     }
 
-    // Fungsi untuk menampilkan soal ke layar
     void ShowQuestion()
     {
-        // Cek apakah index masih dalam batas jumlah soal yang tersedia
         if (currentQuestionIndex < allQuestions.Count && currentQuestionIndex < maxQuestions)
         {
             Question q = allQuestions[currentQuestionIndex];
 
-            // Tampilkan teks pertanyaan
             if (questionText != null) questionText.text = q.questionText;
 
-            // Tampilkan pilihan jawaban di tombol
+
+            currentShuffledIndices.Clear();
+            for (int k = 0; k < q.answers.Length; k++)
+            {
+                currentShuffledIndices.Add(k);
+            }
+
+            for (int i = 0; i < currentShuffledIndices.Count; i++)
+            {
+                int temp = currentShuffledIndices[i];
+                int randomIndex = Random.Range(i, currentShuffledIndices.Count);
+                currentShuffledIndices[i] = currentShuffledIndices[randomIndex];
+                currentShuffledIndices[randomIndex] = temp;
+            }
+
             for (int i = 0; i < answerButtons.Length; i++)
             {
                 if (i < q.answers.Length)
                 {
                     answerButtons[i].gameObject.SetActive(true);
-                    answerButtons[i].SetAnswerText(q.answers[i]);
+
+
+                    int originalIndex = currentShuffledIndices[i];
+
+                    answerButtons[i].SetAnswerText(q.answers[originalIndex]);
                 }
                 else
                 {
-                    // Matikan tombol jika jawaban kurang dari 4
                     answerButtons[i].gameObject.SetActive(false);
                 }
             }
         }
         else
         {
-            // Menang jika soal habis
             GameOver("Selamat! Semua soal selesai.");
         }
     }
 
-    // Fungsi yang dipanggil saat tombol jawaban diklik
-    public void AnswerClicked(int selectedIndex)
+    public void AnswerClicked(int buttonIndex)
     {
         if (!isGameActive) return;
 
         Question currentQ = allQuestions[currentQuestionIndex];
 
-        // Cek Jawaban
-        if (selectedIndex == currentQ.correctAnswerIndex)
+        int originalAnswerIndex = currentShuffledIndices[buttonIndex];
+
+        if (originalAnswerIndex == currentQ.correctAnswerIndex)
         {
             Debug.Log("Jawaban Benar!");
-            currentQuestionIndex++; // Lanjut ke soal berikutnya
+            currentQuestionIndex++;
             ShowQuestion();
         }
         else
@@ -150,7 +163,6 @@ public class QuizGameManager : MonoBehaviour
         }
     }
 
-    // Update tampilan timer (Format 0:45)
     void UpdateTimerUI()
     {
         if (timerText != null)
@@ -159,17 +171,13 @@ public class QuizGameManager : MonoBehaviour
             int seconds = Mathf.FloorToInt(timer - minutes * 60);
             timerText.text = string.Format("{0:0}:{1:00}", minutes, seconds);
 
-            // Ubah warna jadi merah jika waktu tinggal 10 detik
             if (timer <= 10f) timerText.color = Color.red;
         }
     }
 
-    // Update tampilan nyawa (Tanda Silang)
     void UpdateLivesUI()
     {
-        // Logic: 3 nyawa = 0 silang, 2 nyawa = 1 silang, dst.
         int crossIndexToShow = 2 - currentLives;
-
         if (crossIndexToShow >= 0 && crossIndexToShow < crossIcons.Length)
         {
             if (crossIcons[crossIndexToShow] != null)
@@ -177,14 +185,11 @@ public class QuizGameManager : MonoBehaviour
         }
     }
 
-    // Fungsi Game Over
     void GameOver(string message)
     {
         isGameActive = false;
         if (questionText != null) questionText.text = message;
-        Debug.Log(message);
 
-        // Nonaktifkan interaksi tombol
         foreach (var btn in answerButtons)
         {
             btn.GetComponent<Button>().interactable = false;
