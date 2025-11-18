@@ -3,32 +3,31 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.Events;
+// Tambahkan namespace ini agar support Input System baru jika terinstall
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 public class EssayTypingManager : MonoBehaviour
 {
-    [Header("Komponen UI")]
-    [Tooltip("Masukkan pg1, pg2, pg3, pg4 ke dalam array ini secara berurutan")]
-    public TMP_Text[] essaySlots; // UBAHAN: Menggunakan Array TMP untuk pg1-pg4
-
+    [Header("UI References")]
+    [Tooltip("Masukkan pg1, pg2, pg3, pg4 ke sini secara berurutan")]
+    public TMP_Text[] essaySlots;
     public TMP_Text timerTextDisplay;
 
-    [Header("Sumber Soal (JSON)")]
-    [Tooltip("Masukkan file EssayTopics.json di sini")]
+    [Header("Data Soal")]
     public TextAsset jsonFile;
 
-    // Kita tidak perlu memilih topik manual lagi, karena akan di-randomize
-    // public string topicToPlay = "reformasi_1998"; 
-
-    [Header("Pengaturan Game")]
-    public float gameDuration = 105.0f; // UBAHAN: Waktu diset ke 105 detik
+    [Header("Game Settings")]
+    public float gameDuration = 105.0f; // Waktu 105 Detik
     public bool autoSkipSpaces = true;
 
-    [Header("Warna")]
+    [Header("Visual Feedback")]
     public string colorCorrect = "#000000"; // Hitam
     public string colorDefault = "#808080"; // Abu-abu
     public string colorError = "#FF0000";   // Merah
 
-    // --- Data Classes untuk JSON ---
+    // --- Struktur Data JSON ---
     [System.Serializable]
     public class EssayTopicData
     {
@@ -41,264 +40,267 @@ public class EssayTypingManager : MonoBehaviour
     {
         public EssayTopicData[] topics;
     }
-    // -------------------------------
+    // --------------------------
 
-    // State Variables
-    private string[] targetLines; // Menyimpan kalimat target per baris
-    private int currentLineIndex = 0; // Baris mana yang sedang diketik (0-3)
-    private int currentCharIndex = 0; // Huruf ke berapa di baris tersebut
-
+    private string[] targetLines;
+    private int currentLineIndex = 0;
+    private int currentCharIndex = 0;
     private float currentTimer;
     private bool isGameActive = false;
     private bool isFlashingError = false;
 
-    // Events
     public UnityEvent OnGameWin;
     public UnityEvent OnGameLose;
 
     void Start()
     {
-        if (jsonFile != null)
+        Debug.Log("Script Dimulai (Versi Sanitasi Input).."); // DEBUG
+
+        if (jsonFile == null)
         {
-            LoadContentFromJsonRandomly();
+            Debug.LogError("ERROR FATAL: Slot 'Json File' di Inspector masih KOSONG (None). Masukkan file .json!");
+            return;
         }
-        else
+
+        if (essaySlots == null || essaySlots.Length == 0)
         {
-            Debug.LogError("File JSON belum dimasukkan!");
+            Debug.LogError("ERROR FATAL: Slot 'Essay Slots' belum diisi (Size 0)!");
+            return;
         }
+
+        for (int i = 0; i < essaySlots.Length; i++)
+        {
+            if (essaySlots[i] == null)
+            {
+                Debug.LogError($"ERROR: Essay Slot Element {i} masih kosong (None). Harap isi pg{i + 1}!");
+                return;
+            }
+        }
+
+        PrepareGameContent();
     }
 
-    void LoadContentFromJsonRandomly()
+    // Fungsi Sanitasi Teks: Hapus spasi ganda, spasi di awal/akhir.
+    string SanitizeText(string input)
+    {
+        // 1. Hapus spasi di awal dan akhir
+        string clean = input.Trim();
+        // 2. Ganti semua spasi ganda menjadi spasi tunggal
+        while (clean.Contains("  "))
+        {
+            clean = clean.Replace("  ", " ");
+        }
+        return clean;
+    }
+
+    void PrepareGameContent()
     {
         try
         {
             EssayData data = JsonUtility.FromJson<EssayData>(jsonFile.text);
-
-            if (data.topics == null || data.topics.Length == 0) return;
-
-            // 1. Pilih Topik Secara Acak
-            int randomTopicIndex = Random.Range(0, data.topics.Length);
-            EssayTopicData selectedTopic = data.topics[randomTopicIndex];
-            Debug.Log($"Topik terpilih: {selectedTopic.topicID}");
-
-            if (selectedTopic.sentences.Length > 0)
+            if (data == null || data.topics == null || data.topics.Length == 0)
             {
-                // 2. Acak Urutan Kalimat (Shuffle) agar unik dan tidak sama
-                List<string> shuffledList = new List<string>(selectedTopic.sentences);
-                for (int i = 0; i < shuffledList.Count; i++)
-                {
-                    string temp = shuffledList[i];
-                    int randomIndex = Random.Range(i, shuffledList.Count);
-                    shuffledList[i] = shuffledList[randomIndex];
-                    shuffledList[randomIndex] = temp;
-                }
-
-                // 3. Ambil kalimat sejumlah slot UI yang tersedia (misal 4 slot)
-                int linesCount = Mathf.Min(essaySlots.Length, shuffledList.Count);
-                targetLines = new string[linesCount];
-
-                for (int i = 0; i < linesCount; i++)
-                {
-                    targetLines[i] = shuffledList[i];
-                }
-
-                StartGame();
+                Debug.LogError("JSON Gagal dibaca atau Format Salah!");
+                return;
             }
+
+            int randomTopicIdx = Random.Range(0, data.topics.Length);
+            EssayTopicData selectedTopic = data.topics[randomTopicIdx];
+
+            List<string> pool = new List<string>(selectedTopic.sentences);
+
+            // Lakukan Shuffle (Fisher-Yates)
+            for (int i = 0; i < pool.Count; i++)
+            {
+                string temp = pool[i];
+                int r = Random.Range(i, pool.Count);
+                pool[i] = pool[r];
+                pool[r] = temp;
+            }
+
+            // Ambil dan Sanitasi 4 Kalimat Acak
+            int linesNeeded = Mathf.Min(essaySlots.Length, pool.Count);
+            targetLines = new string[linesNeeded];
+            for (int i = 0; i < linesNeeded; i++)
+            {
+                targetLines[i] = SanitizeText(pool[i]); // <--- SANITASI DI SINI
+                Debug.Log($"Baris {i}: '{targetLines[i]}'");
+            }
+
+            Debug.Log($"Game Siap! Total Baris Soal: {targetLines.Length}");
+            StartGame();
         }
         catch (System.Exception e)
         {
-            Debug.LogError("JSON Error: " + e.Message);
+            Debug.LogError($"EXCEPTION saat load JSON: {e.Message}");
         }
-    }
-
-    void Update()
-    {
-        if (!isGameActive) return;
-        HandleTimer();
-        HandleInput();
     }
 
     void StartGame()
     {
-        if (targetLines == null || targetLines.Length == 0) return;
-
-        // Reset State
         currentTimer = gameDuration;
         currentLineIndex = 0;
         currentCharIndex = 0;
         isGameActive = true;
 
-        // Reset Visual Awal (Semua Text jadi Abu-abu)
+        // Reset Visual
         for (int i = 0; i < essaySlots.Length; i++)
         {
+            if (essaySlots[i] == null) continue;
+
             if (i < targetLines.Length)
                 essaySlots[i].text = $"<color={colorDefault}>{targetLines[i]}</color>";
             else
-                essaySlots[i].text = ""; // Kosongkan jika slot berlebih
+                essaySlots[i].text = "";
         }
 
-        // Cek auto-skip untuk karakter pertama di baris pertama
         if (autoSkipSpaces) CheckForAutoSkip();
+        UpdateVisuals();
 
-        UpdateActiveLineVisuals(); // Update tampilan baris pertama
+        Debug.Log("Game Loop Aktif. SILAKAN KLIK LAYAR GAME DAN KETIK!");
+    }
+
+    void OnEnable()
+    {
+#if ENABLE_INPUT_SYSTEM
+        if (Keyboard.current != null) Keyboard.current.onTextInput += OnNewSystemTextInput;
+#endif
+    }
+
+    void OnDisable()
+    {
+#if ENABLE_INPUT_SYSTEM
+        if (Keyboard.current != null) Keyboard.current.onTextInput -= OnNewSystemTextInput;
+#endif
+    }
+
+    // New Input System
+    void OnNewSystemTextInput(char c)
+    {
+        if (!isGameActive) return;
+        if (c == '\b' || c == '\n' || c == '\r') return;
+
+        Debug.Log($"[New Input System] DETEKSI INPUT: '{c}'");
+        ValidateCharacter(c);
+    }
+
+
+    void Update()
+    {
+        if (!isGameActive) return;
+
+        HandleTimer();
+
+        // --- FALLBACK INPUT LAMA ---
+        if (Input.anyKeyDown)
+        {
+            if (!string.IsNullOrEmpty(Input.inputString))
+            {
+                foreach (char c in Input.inputString)
+                {
+                    if (c == '\b' || c == '\n' || c == '\r') continue;
+                    // Debug.Log($"[Old Input System] DETEKSI INPUT: '{c}'"); // Jika mau verbose
+                    ValidateCharacter(c);
+                }
+            }
+        }
     }
 
     void HandleTimer()
     {
         currentTimer -= Time.deltaTime;
-
-        // Format waktu mm:ss
-        int minutes = Mathf.FloorToInt(currentTimer / 60F);
-        int seconds = Mathf.FloorToInt(currentTimer % 60F);
-
         if (timerTextDisplay != null)
-            timerTextDisplay.text = string.Format("{0:00}:{1:00}", minutes, seconds);
-
-        if (currentTimer <= 0)
         {
-            GameOver();
+            int minutes = Mathf.FloorToInt(currentTimer / 60F);
+            int seconds = Mathf.FloorToInt(currentTimer % 60F);
+            timerTextDisplay.text = string.Format("{0:0}:{1:00}", minutes, seconds);
         }
-    }
-
-    void HandleInput()
-    {
-        if (!string.IsNullOrEmpty(Input.inputString))
-        {
-            foreach (char c in Input.inputString)
-            {
-                // Abaikan backspace atau enter
-                if (c == '\b' || c == '\n' || c == '\r') continue;
-                ValidateCharacter(c);
-            }
-        }
+        if (currentTimer <= 0) GameOver();
     }
 
     void ValidateCharacter(char typedChar)
     {
-        // Cek apakah sudah selesai semua baris
         if (currentLineIndex >= targetLines.Length) return;
 
-        string currentLine = targetLines[currentLineIndex];
+        string currentLineData = targetLines[currentLineIndex];
+        if (currentCharIndex >= currentLineData.Length) return;
 
-        // Safety check
-        if (currentCharIndex >= currentLine.Length) return;
+        char targetChar = currentLineData[currentCharIndex];
 
-        char targetChar = currentLine[currentCharIndex];
-
-        // --- LOGIKA BENAR ---
-        // Kita gunakan char.ToLower untuk toleransi kapital jika diinginkan, 
-        // tapi biasanya typing game case-sensitive. Di sini kita buat Case-Sensitive sesuai contoh.
         if (typedChar == targetChar)
         {
             currentCharIndex++;
-
-            // Cek Auto Skip (Spasi)
             if (autoSkipSpaces) CheckForAutoSkip();
+            UpdateVisuals();
 
-            UpdateActiveLineVisuals();
-
-            // Cek apakah baris ini sudah selesai?
-            if (currentCharIndex >= currentLine.Length)
+            if (currentCharIndex >= currentLineData.Length)
             {
-                // Pindah ke baris berikutnya
                 currentLineIndex++;
-                currentCharIndex = 0; // Reset index huruf untuk baris baru
+                currentCharIndex = 0;
 
-                // Jika masih ada baris berikutnya, cek auto skip untuk huruf pertamanya
                 if (currentLineIndex < targetLines.Length)
                 {
                     if (autoSkipSpaces) CheckForAutoSkip();
-                    UpdateActiveLineVisuals();
+                    UpdateVisuals();
                 }
                 else
                 {
-                    // Sudah tidak ada baris lagi -> MENANG
                     GameWin();
                 }
             }
         }
-        // --- LOGIKA SALAH ---
         else
         {
-            if (!isFlashingError)
-            {
-                StartCoroutine(FlashErrorEffect());
-            }
+            if (!isFlashingError) StartCoroutine(FlashErrorEffect());
         }
     }
 
-    // Melewati spasi secara otomatis di baris yang sedang aktif
     void CheckForAutoSkip()
     {
         if (currentLineIndex >= targetLines.Length) return;
-
-        string currentLine = targetLines[currentLineIndex];
-
-        while (currentCharIndex < currentLine.Length)
+        string line = targetLines[currentLineIndex];
+        while (currentCharIndex < line.Length && char.IsWhiteSpace(line[currentCharIndex]))
         {
-            char nextChar = currentLine[currentCharIndex];
-            if (char.IsWhiteSpace(nextChar))
-            {
-                currentCharIndex++;
-            }
-            else
-            {
-                break;
-            }
+            currentCharIndex++;
         }
     }
 
-    // Memperbarui warna teks HANYA pada baris yang sedang aktif
-    void UpdateActiveLineVisuals()
+    void UpdateVisuals()
     {
-        if (isFlashingError || currentLineIndex >= targetLines.Length) return;
+        if (currentLineIndex < targetLines.Length && !isFlashingError)
+        {
+            string line = targetLines[currentLineIndex];
+            string finished = line.Substring(0, currentCharIndex);
+            string remaining = line.Substring(currentCharIndex);
+            essaySlots[currentLineIndex].text = $"<color={colorCorrect}>{finished}</color><color={colorDefault}>{remaining}</color>";
+        }
 
-        string currentLine = targetLines[currentLineIndex];
-
-        // Potong teks berdasarkan posisi kursor saat ini
-        string correctPart = currentLine.Substring(0, currentCharIndex);
-        string remainingPart = currentLine.Substring(currentCharIndex);
-
-        // Format: Hitam (sudah diketik) + Abu-abu (belum)
-        essaySlots[currentLineIndex].text = $"<color={colorCorrect}>{correctPart}</color><color={colorDefault}>{remainingPart}</color>";
-
-        // Pastikan baris yang SUDAH LEWAT tetap hitam penuh (opsional, untuk keamanan visual)
         for (int i = 0; i < currentLineIndex; i++)
         {
-            essaySlots[i].text = $"<color={colorCorrect}>{targetLines[i]}</color>";
+            if (essaySlots[i] != null)
+                essaySlots[i].text = $"<color={colorCorrect}>{targetLines[i]}</color>";
         }
     }
 
-    System.Collections.IEnumerator FlashErrorEffect()
+    IEnumerator FlashErrorEffect()
     {
         isFlashingError = true;
+        string line = targetLines[currentLineIndex];
+        string finished = line.Substring(0, currentCharIndex);
+        char errorChar = line[currentCharIndex];
+        string remaining = "";
+        if (currentCharIndex + 1 < line.Length) remaining = line.Substring(currentCharIndex + 1);
 
-        string currentLine = targetLines[currentLineIndex];
-
-        // Ambil bagian benar
-        string correctPart = currentLine.Substring(0, currentCharIndex);
-
-        // Ambil huruf yang salah (targetnya)
-        char errorChar = currentLine[currentCharIndex];
-
-        // Sisa string
-        string remainingPart = "";
-        if (currentCharIndex + 1 < currentLine.Length)
-            remainingPart = currentLine.Substring(currentCharIndex + 1);
-
-        // Tampilkan efek MERAH pada huruf target
-        essaySlots[currentLineIndex].text = $"<color={colorCorrect}>{correctPart}</color><color={colorError}>{errorChar}</color><color={colorDefault}>{remainingPart}</color>";
-
-        yield return new WaitForSeconds(0.2f);
-
+        essaySlots[currentLineIndex].text = $"<color={colorCorrect}>{finished}</color><color={colorError}>{errorChar}</color><color={colorDefault}>{remaining}</color>";
+        yield return new WaitForSeconds(0.15f);
         isFlashingError = false;
-        UpdateActiveLineVisuals(); // Kembalikan ke normal
+        UpdateVisuals();
     }
 
     void GameWin()
     {
         isGameActive = false;
-        Debug.Log("Menang"); // Log sesuai permintaan
+        Debug.Log("GAME WON!");
         OnGameWin?.Invoke();
     }
 
@@ -307,7 +309,7 @@ public class EssayTypingManager : MonoBehaviour
         isGameActive = false;
         currentTimer = 0;
         if (timerTextDisplay != null) timerTextDisplay.text = "00:00";
-        Debug.Log("Kalah"); // Log sesuai permintaan
+        Debug.Log("GAME OVER!");
         OnGameLose?.Invoke();
     }
 }
