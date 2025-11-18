@@ -404,7 +404,7 @@ GameObject:
   - component: {fileID: 131668611}
   - component: {fileID: 131668610}
   m_Layer: 5
-  m_Name: Text (TMP) (1)
+  m_Name: Pg2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -751,7 +751,7 @@ GameObject:
   - component: {fileID: 255117442}
   - component: {fileID: 255117441}
   m_Layer: 5
-  m_Name: Text (TMP) (3)
+  m_Name: Pg4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -887,7 +887,7 @@ GameObject:
   - component: {fileID: 309817362}
   - component: {fileID: 309817361}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Pg1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1545,7 +1545,7 @@ GameObject:
   - component: {fileID: 1202177854}
   - component: {fileID: 1202177853}
   m_Layer: 5
-  m_Name: Text (TMP) (2)
+  m_Name: Pg3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2189,6 +2189,64 @@ MonoBehaviour:
     m_MipBias: 0
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
+--- !u!1 &1617892514
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1617892516}
+  - component: {fileID: 1617892515}
+  m_Layer: 0
+  m_Name: EssayManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1617892515
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1617892514}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c923b4b36e57572499f8c92ed1c1197a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  essayTextDisplay: {fileID: 0}
+  timerTextDisplay: {fileID: 244560927}
+  essayLines: []
+  gameDuration: 75
+  autoSkipSpaces: 1
+  colorCorrect: '#000000'
+  colorDefault: '#808080'
+  colorError: '#FF0000'
+  OnGameWin:
+    m_PersistentCalls:
+      m_Calls: []
+  OnGameLose:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!4 &1617892516
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1617892514}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 580.2353, y: 337.11142, z: -0.45384508}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1800608940
 GameObject:
   m_ObjectHideFlags: 0
@@ -2677,3 +2735,4 @@ SceneRoots:
   - {fileID: 1440339830}
   - {fileID: 1584622780}
   - {fileID: 985776820}
+  - {fileID: 1617892516}

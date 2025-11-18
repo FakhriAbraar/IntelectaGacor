@@ -1,0 +1,94 @@
+{
+  "topics": [
+    {
+      "topicID": "era_dahulu",
+      "sentences": [
+        "Nenek moyang bangsa Indonesia berasal dari rumpun Austronesia.",
+        "Manusia purba Meganthropus ditemukan di situs Sangiran Jawa Tengah.",
+        "Kebudayaan Dongson membawa pengaruh alat perunggu ke Nusantara.",
+        "Lukisan gua di Maros Sulawesi adalah salah satu seni tertua di dunia.",
+        "Masyarakat praaksara hidup berpindah atau nomaden untuk berburu.",
+        "Sistem kepercayaan animisme memuja roh nenek moyang.",
+        "Dolmen dan menhir adalah peninggalan zaman megalitikum besar.",
+        "Perahu bercadik digunakan pelaut nusantara mengarungi samudra.",
+        "Kehidupan menetap mulai dilakukan saat manusia mengenal bercocok tanam.",
+        "Penemuan api mengubah cara manusia purba mengolah makanan."
+      ]
+    },
+    {
+      "topicID": "kerajaan_nusantara",
+      "sentences": [
+        "Kerajaan Kutai adalah kerajaan Hindu tertua di Indonesia.",
+        "Kerajaan Sriwijaya menjadi pusat pembelajaran agama Buddha terbesar.",
+        "Patih Gajah Mada mengucapkan Sumpah Palapa untuk menyatukan Nusantara.",
+        "Candi Borobudur dibangun pada masa kejayaan Dinasti Syailendra.",
+        "Kerajaan Samudera Pasai adalah kerajaan Islam pertama di Indonesia.",
+        "Raja Hayam Wuruk membawa Majapahit ke puncak kejayaan.",
+        "Kerajaan Tarumanegara meninggalkan prasasti tapak kaki gajah.",
+        "Sultan Hasanuddin dari Gowa dijuluki Ayam Jantan dari Timur.",
+        "Kerajaan Mataram Kuno memindahkan pusat kekuasaan ke Jawa Timur.",
+        "Raden Patah mendirikan Kerajaan Demak sebagai pusat penyebaran Islam."
+      ]
+    },
+    {
+      "topicID": "sejarah_1900",
+      "sentences": [
+        "Organisasi Budi Utomo didirikan pada tanggal 20 Mei 1908.",
+        "Politik Etis membuka jalan bagi pendidikan kaum pribumi.",
+        "Sumpah Pemuda menyatukan visi kebangsaan pada tahun 1928.",
+        "Sarekat Islam berjuang membela kepentingan pedagang pribumi.",
+        "Raden Ajeng Kartini memperjuangkan emansipasi wanita melalui tulisan.",
+        "Taman Siswa didirikan oleh Ki Hajar Dewantara di Yogyakarta.",
+        "Surat kabar Medan Prijaji menjadi corong suara nasionalisme.",
+        "Indische Partij adalah partai politik pertama yang menuntut kemerdekaan.",
+        "Lagu Indonesia Raya pertama kali diperdengarkan saat Kongres Pemuda.",
+        "Pergerakan nasional mengubah perjuangan fisik menjadi diplomasi."
+      ]
+    },
+    {
+      "topicID": "sebelum_kemerdekaan",
+      "sentences": [
+        "Jepang mendarat pertama kali di Tarakan Kalimantan Timur.",
+        "BPUPKI dibentuk untuk mempersiapkan dasar negara Indonesia merdeka.",
+        "Panitia Sembilan merumuskan Piagam Jakarta sebagai rancangan dasar.",
+        "Soekarno menyampaikan pidato lahirnya Pancasila pada 1 Juni.",
+        "Peristiwa Rengasdengklok mendesak percepatan proklamasi kemerdekaan.",
+        "Jepang menyerah tanpa syarat kepada Sekutu setelah bom atom.",
+        "Laksamana Maeda meminjamkan rumahnya untuk perumusan teks proklamasi.",
+        "Sayuti Melik mengetik naskah proklamasi yang otentik.",
+        "Bendera Merah Putih dijahit oleh Ibu Fatmawati.",
+        "Golongan muda menolak kemerdekaan sebagai hadiah dari Jepang."
+      ]
+    },
+    {
+      "topicID": "mempertahankan_kemerdekaan",
+      "sentences": [
+        "Pertempuran 10 November di Surabaya dikenang sebagai Hari Pahlawan.",
+        "Jenderal Soedirman memimpin perang gerilya melawan agresi Belanda.",
+        "Perjanjian Linggarjati mengakui wilayah Jawa Sumatera dan Madura.",
+        "Serangan Umum 1 Maret membuktikan TNI masih kuat di Yogyakarta.",
+        "Konferensi Meja Bundar akhirnya mengakui kedaulatan Indonesia.",
+        "Bandung Lautan Api adalah taktik bumi hangus agar kota tidak dipakai musuh.",
+        "Agresi Militer Belanda melanggar perjanjian damai yang disepakati.",
+        "Pemerintah Darurat Republik Indonesia dibentuk di Bukittinggi.",
+        "Delegasi Indonesia dipimpin Moh Hatta dalam Konferensi Meja Bundar.",
+        "Perjuangan diplomasi dilakukan untuk mendapat pengakuan internasional."
+      ]
+    },
+    {
+      "topicID": "reformasi_1998",
+      "sentences": [
+        "Krisis moneter menyebabkan nilai tukar rupiah jatuh sangat drastis.",
+        "Mahasiswa menduduki gedung DPR dan MPR menuntut reformasi total.",
+        "Tragedi Trisakti memicu gelombang demonstrasi yang lebih besar.",
+        "Presiden Soeharto mengundurkan diri pada tanggal 21 Mei 1998.",
+        "Era Reformasi membuka kebebasan pers dan demokrasi di Indonesia.",
+        "Tuntutan utama reformasi adalah pemberantasan Korupsi Kolusi Nepotisme.",
+        "BJ Habibie menggantikan Soeharto sebagai Presiden Republik Indonesia.",
+        "Kerusuhan Mei 1998 menjadi catatan kelam sejarah hak asasi manusia.",
+        "Pemilu 1999 menjadi pemilu pertama yang demokratis di era reformasi.",
+        "Amandemen UUD 1945 dilakukan untuk membatasi masa jabatan presiden."
+      ]
+    }
+  ]
+}
